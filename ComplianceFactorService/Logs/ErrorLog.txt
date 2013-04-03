@@ -1,0 +1,28 @@
+12/12/2012 08:45 PM : NotificationService:GetNewNotificationCount()  : Error converting data type nvarchar to uniqueidentifier.
+
+01/29/2013 02:06 PM : CommunicationService:GetUpdatedFNWebToMobile()  : Cannot find table 1.
+
+01/30/2013 01:05 PM : CommunicationService:DownloadReceivedFieldNote()  : Object reference not set to an instance of an object.
+
+01/30/2013 01:13 PM : CommunicationService:DownloadReceivedFieldNote()  : Object reference not set to an instance of an object.
+
+01/31/2013 08:40 PM : CommunicationService:GetFieldNoteAcknowledgementResult()  : Value cannot be null.
+Parameter name: s
+
+01/31/2013 08:41 PM : CommunicationService:GetFieldNoteAcknowledgementResult()  : Value cannot be null.
+Parameter name: s
+
+02/02/2013 03:47 PM : CommunicationService:UpdatedFNMobileResponse()  : Procedure or function 'sv_wcf_fieldnote_modify_sync_mobile' expects parameter '@sv_fieldnote_created_by_fk', which was not supplied.
+
+02/02/2013 03:57 PM : CommunicationService:UpdatedFNMobileResponse()  : The COMMIT TRANSACTION request has no corresponding BEGIN TRANSACTION.
+
+02/06/2013 05:00 PM : FileTransferService:Upload()  : The remote server returned an error: (530) Not logged in.
+
+02/06/2013 06:45 PM : FileTransferService:Upload()  : The remote server returned an error: (530) Not logged in.
+
+02/07/2013 04:38 PM : CommunicationService:UserArchiveFieldNoteFromWeb()  : Procedure or function 'sv_wcf_get_web_archive_fieldnote' expects parameter '@sv_fieldnote_user_id', which was not supplied.
+
+02/28/2013 09:15 PM : CommunicationService:GetUpdatedFNWebToMobile()  : Object reference not set to an instance of an object.
+
+02/28/2013 09:16 PM : CommunicationService:GetUpdatedFNWebToMobile()  : Object reference not set to an instance of an object.
+
