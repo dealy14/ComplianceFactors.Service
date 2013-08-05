@@ -61,7 +61,7 @@ namespace ComplianceFactorService
                 else
                     objFieldnotesBE.AttachmentXML = null;
 
-
+                Logger.WriteToErrorLog("CommunicationService:CreateFieldNote() ", "Inserting " + objFieldnotesBE.FieldNoteID);
                 //Insert on Fieldnotes On DB
                 string strResult = FieldNotesBLL.CreateFieldNotes(objFieldnotesBE);
                 if (strResult == "0")
@@ -122,6 +122,8 @@ namespace ComplianceFactorService
                 return xmlDoc.InnerXml;
             }
         }
+
+       
 
       
 
@@ -904,18 +906,659 @@ namespace ComplianceFactorService
         #endregion
 
         #region OJT
-        public void CreateOJT()
+        #region Create OJT
+        public string CreateOJT(string strJsonOJT)
         {
-            //to do
+            CreateOJTResponse objResponse = new CreateOJTResponse();
+            try
+            {
+                OJTBE objOJTBE = new OJTBE();
+                objOJTBE = Utility.Utility.JsonDeserialize<OJTBE>(strJsonOJT);
+
+                List<OJTAttachmentBE> lstAttachment = new List<OJTAttachmentBE>();
+                List<OJTSentToBE> lstOJTSentTo = new List<OJTSentToBE>();
+                List<OJTSentToBE> lstOJTSentTotemp = new List<OJTSentToBE>();
+                lstOJTSentTo = objOJTBE.SentTo;
+                lstAttachment = objOJTBE.Attachment;
+                if (lstOJTSentTo != null)
+                {
+                    //Get the sentto userid from the username
+                    foreach (OJTSentToBE objTempSentTo in lstOJTSentTo)
+                    {
+                        //encrypt the Username and get userid from db
+                        //encrypt and check with db
+                        objTempSentTo.SentTo = objUtility.GenerateHashvalue(objTempSentTo.SentTo, true);
+                        lstOJTSentTotemp.Add(objTempSentTo);
+                    }
+
+                    //Convert the List object To XML string
+                    //objFieldnotesBE.SentToXML = ObjectToXML(lstFieldSentTo);
+                    objOJTBE.SentToXML = SentToObjectToXML_OJT(lstOJTSentTotemp);
+                }
+                else
+                    objOJTBE.SentToXML = null;
+
+                if (lstAttachment != null)
+                    objOJTBE.AttachmentXML = AttachmentObjectToXML_OJT(lstAttachment);
+                else
+                    objOJTBE.AttachmentXML = null;
+
+
+                //Insert on Fieldnotes On DB
+                string strResult = OJTBLL.CreateOJT(objOJTBE);
+                if (strResult == "0")
+                {
+                    strResult = objOJTBE.OJTID;
+                    objResponse.OJTID = objOJTBE.OJTID;
+                }
+
+                if (strResult == "-1")
+                {
+                    objResponse.StatusCode = "1";
+                    objResponse.StatusMessage = "DB Error";
+                }
+                else
+                {
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:CreateOJT() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:CreateOJT() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
         }
-        public void EditOJT()
+
+        public string SentToObjectToXML_OJT(List<OJTSentToBE> User)
         {
-            //to do
+            XmlDocument xmlDoc = new XmlDocument();
+            XmlSerializer xmlSerializer = new XmlSerializer(User.GetType());
+            using (MemoryStream xmlStream = new MemoryStream())
+            {
+                xmlSerializer.Serialize(xmlStream, User);
+                xmlStream.Position = 0;
+                xmlDoc.Load(xmlStream);
+                return xmlDoc.InnerXml;
+            }
         }
-        public void SetOJTAcknowledgement()
+
+        public string AttachmentObjectToXML_OJT(List<OJTAttachmentBE> Attach)
         {
-            //to do
+            XmlDocument xmlDoc = new XmlDocument();
+            XmlSerializer xmlSerializer = new XmlSerializer(Attach.GetType());
+            using (MemoryStream xmlStream = new MemoryStream())
+            {
+                xmlSerializer.Serialize(xmlStream, Attach);
+                xmlStream.Position = 0;
+                xmlDoc.Load(xmlStream);
+                return xmlDoc.InnerXml;
+            }
         }
+
+        public string DeleteAttachOJT(string strOJTAttachID)
+        {
+            GeneralResponse objResponse = new GeneralResponse();
+            try
+            {
+                //Need to delete the file on FTP
+                string strResult = OJTBLL.DeleteAttachOJT(strOJTAttachID);
+                if (strResult == "-1")
+                {
+                    objResponse.StatusCode = "1";
+                    objResponse.StatusMessage = "DB Error";
+                }
+                else
+                {
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:DeleteAttachOJT() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:DeleteAttachOJT() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+
+        public string GetDeleteAttachOJTFromWeb(string strUserId)
+        {
+            GetDeleteAttachOJTResponse objResponse = new GetDeleteAttachOJTResponse();
+            try
+            {
+                List<OJTAttachmentBE> lstAttachment = new List<OJTAttachmentBE>();
+                lstAttachment = OJTBLL.GetDeleteAttachOJT(strUserId);
+
+                objResponse.StatusCode = "0";
+                objResponse.StatusMessage = "Success";
+                objResponse.DeletedAttachment = lstAttachment;
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:GetDeleteAttachOJTFromWeb() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:GetDeleteAttachOJTFromWeb() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+        #endregion
+
+        #region Update OJT
+        public string UpdateOJT(string strJsonOJT)
+        {
+            CreateOJTResponse objResponse = new CreateOJTResponse();
+            try
+            {
+                List<OJTAttachmentBE> lstAttachment = new List<OJTAttachmentBE>();
+                OJTBE objOJTBE = new OJTBE();
+                objOJTBE = Utility.Utility.JsonDeserialize<OJTBE>(strJsonOJT);
+                lstAttachment = objOJTBE.Attachment;
+                if (lstAttachment != null)
+                    objOJTBE.AttachmentXML = AttachmentObjectToXML_OJT(lstAttachment);
+                else
+                    objOJTBE.AttachmentXML = null;
+                //List<FieldNotesSentToBE> lstFieldSentTo = new List<FieldNotesSentToBE>();
+                //lstFieldSentTo = objFieldnotesBE.SentTo;
+                ////Convert the List object To XML string
+                //objFieldnotesBE.SentToXML = ObjectToXML(lstFieldSentTo);
+
+                //Insert on Fieldnotes On DB
+                string strResult = OJTBLL.UpdateOJT(objOJTBE);
+                if (strResult == "0")
+                {
+                    strResult = objOJTBE.OJTID;
+                    objResponse.OJTID = objOJTBE.OJTID;
+                }
+
+                if (strResult == "-1")
+                {
+                    objResponse.StatusCode = "1";
+                    objResponse.StatusMessage = "DB Error";
+                }
+                else
+                {
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:ModifyOJT() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:ModifyOJT() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+        #endregion
+
+        #region Web Saved OJT  sent to Mobile
+        public string GetSavedOJTWebToMobile(string strJsonOJT)
+        {
+            GetSavedOJTResponse objResponse = new GetSavedOJTResponse();
+            try
+            {
+                OJTBEBase objOJTBEbase = new OJTBEBase();
+                OJTSavedWebToMobileBE objOJTBE = new OJTSavedWebToMobileBE();
+                objOJTBEbase = Utility.Utility.JsonDeserialize<OJTBEBase>(strJsonOJT);
+
+                objOJTBE = OJTBLL.GetSavedOJTWebToMobile(objOJTBEbase);
+                if (objOJTBE != null)
+                {
+                    objResponse.OJT = objOJTBE;
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:GetSavedOJTWebToMobile() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:GetSavedOJTWebToMobile() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+        public string SavedOJTMobileResponse(string strJsonOJT)
+        {
+            OJTResponseFromMobile objResponseFromMobile = new OJTResponseFromMobile();
+            try
+            {
+                objResponseFromMobile = Utility.Utility.JsonDeserialize<OJTResponseFromMobile>(strJsonOJT);
+                if (objResponseFromMobile.StatusCode == "0")
+                {
+                    OJTBEBase objOJTBase = new OJTBEBase();
+                    objOJTBase.OJTID = objResponseFromMobile.OJTID;
+                    objOJTBase.CreatedBy = objResponseFromMobile.CreatedBy;
+                    string strResult = OJTBLL.SavedOJTMobileResponse(objOJTBase);
+                    if (strResult == "0")
+                    {
+                        objResponseFromMobile.StatusCode = "0";
+                        objResponseFromMobile.StatusMessage = "Success";
+                    }
+                    else
+                    {
+                        objResponseFromMobile.StatusCode = "-3";
+                        objResponseFromMobile.StatusMessage = "db error";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:SavedOJTMobileResponse() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:SavedOJTMobileResponse() ", ex.Message);
+                    objResponseFromMobile.StatusCode = "-3";
+                    objResponseFromMobile.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponseFromMobile.GetType(), objResponseFromMobile);
+            return strResponse;
+        }
+        #endregion
+
+        #region Web Updated OJT  sent to Mobile
+        public string GetUpdatedOJTWebToMobile(string strJsonOJT)
+        {
+            GetSavedOJTResponse objResponse = new GetSavedOJTResponse();
+            try
+            {
+                OJTBEBase objOJTBEbase = new OJTBEBase();
+                OJTSavedWebToMobileBE objOJTBE = new OJTSavedWebToMobileBE();
+                objOJTBEbase = Utility.Utility.JsonDeserialize<OJTBEBase>(strJsonOJT);
+
+                objOJTBE = OJTBLL.GetUpdatedOJTWebToMobile(objOJTBEbase);
+                if (objOJTBE != null)
+                {
+                    objResponse.OJT = objOJTBE;
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:GetUpdatedOJTWebToMobile() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:GetUpdatedOJTWebToMobile() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+
+        public string UpdatedOJTMobileResponse(string strJsonOJT)
+        {
+            OJTResponseFromMobile objResponseFromMobile = new OJTResponseFromMobile();
+            try
+            {
+                objResponseFromMobile = Utility.Utility.JsonDeserialize<OJTResponseFromMobile>(strJsonOJT);
+                if (objResponseFromMobile.StatusCode == "0")
+                {
+                    OJTBEBase objOJTBase = new OJTBEBase();
+                    objOJTBase.OJTID = objResponseFromMobile.OJTID;
+                    objOJTBase.CreatedBy = objResponseFromMobile.CreatedBy;
+                    string strResult = OJTBLL.UpdatedOJTMobileResponse(objOJTBase);
+                    if (strResult == "0")
+                    {
+                        objResponseFromMobile.StatusCode = "0";
+                        objResponseFromMobile.StatusMessage = "Success";
+                    }
+                    else
+                    {
+                        objResponseFromMobile.StatusCode = "-3";
+                        objResponseFromMobile.StatusMessage = "db error";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:UpdatedOJTMobileResponse() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:UpdatedOJTMobileResponse() ", ex.Message);
+                    objResponseFromMobile.StatusCode = "-3";
+                    objResponseFromMobile.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponseFromMobile.GetType(), objResponseFromMobile);
+            return strResponse;
+        }
+        #endregion
+
+        #region DownloadReceivedOJT
+        public string DownloadReceivedOJT(string strUserId)
+        {
+            DownloadReceivedOJTResponse objResponse = new DownloadReceivedOJTResponse();
+            try
+            {
+                List<OJTDownloadBE> lstOJTBE = new List<OJTDownloadBE>();
+                OJTReceivedWebToMobileBE objOJTReceicvedBE = new OJTReceivedWebToMobileBE();
+                objOJTReceicvedBE = OJTBLL.GetReceivedOJT(strUserId);
+                if (objOJTReceicvedBE != null)
+                {
+                    if (objOJTReceicvedBE.LOJT != null)
+                    {
+                        foreach (OJTDownloadBE obj in objOJTReceicvedBE.LOJT)
+                        {
+                            string strCreatedByNameEnc = objUtility.Decrypt(obj.CreatedByName, true);
+                            obj.CreatedByName = strCreatedByNameEnc;
+                            lstOJTBE.Add(obj);
+                        }
+                        objOJTReceicvedBE.LOJT = lstOJTBE;
+                    }
+                    objResponse.OJT = objOJTReceicvedBE;
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:DownloadReceivedOJT() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:DownloadReceivedOJT() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+        public string ReceivedOJTResponse(string strJsonString)
+        {
+            GeneralResponse objResponse = new GeneralResponse();
+            try
+            {
+                OJTSentToBE objOJT = new OJTSentToBE();
+                objOJT = Utility.Utility.JsonDeserialize<OJTSentToBE>(strJsonString);
+                if (objOJT != null)
+                {
+
+                    string strResult = OJTBLL.GetReceivedOJTResponse(objOJT);
+                    if (strResult == "0")
+                    {
+                        objResponse.StatusCode = "0";
+                        objResponse.StatusMessage = "success";
+                    }
+                    else
+                    {
+                        objResponse.StatusCode = strResult;
+                        objResponse.StatusMessage = "Db error";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:ReceivedOJTResponse() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:ReceivedOJTResponse() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+        #endregion
+
+        #region UserAcknowledgeOJT
+        public string UserAcknowledgeOJT(string strJsonString)
+        {
+            GeneralResponse objResponse = new GeneralResponse();
+            try
+            {
+                OJTSentToBE objOJT = new OJTSentToBE();
+                objOJT = Utility.Utility.JsonDeserialize<OJTSentToBE>(strJsonString);
+                if (objOJT != null)
+                {
+
+                    string strResult = OJTBLL.AcknowledgeOJT(objOJT);
+                    if (strResult == "0")
+                    {
+                        objResponse.StatusCode = "0";
+                        objResponse.StatusMessage = "success";
+                    }
+                    else
+                    {
+                        objResponse.StatusCode = strResult;
+                        objResponse.StatusMessage = "Db error";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:UserAcknowledgeOJT() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:UserAcknowledgeOJT() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+
+
+        public string GetOJTAcknowledgementResult(string strUserId)
+        {
+            GetOJTAcknowledgementResultResponse objResponse = new GetOJTAcknowledgementResultResponse();
+            try
+            {
+                List<OJTDownloadAcknowlegdeStatusBE> lstOJTBE = new List<OJTDownloadAcknowlegdeStatusBE>();
+                lstOJTBE = OJTBLL.AcknowledgeOJTSync(strUserId);
+                if (lstOJTBE != null)
+                {
+                    //FNDownloadAcknowlegdeStatusBE objFieldnotesBE = new FNDownloadAcknowlegdeStatusBE();
+                    List<OJTDownloadAcknowlegdeStatusBE> lsttempOJTBE = new List<OJTDownloadAcknowlegdeStatusBE>();
+                    foreach (OJTDownloadAcknowlegdeStatusBE objBE in lstOJTBE)
+                    {
+                        string strCreatedByNameEnc = objUtility.Decrypt(objBE.SentToUserByName, true);
+                        objBE.SentToUserByName = strCreatedByNameEnc;
+                        lsttempOJTBE.Add(objBE);
+                    }
+                    objResponse.AcknowledgedResult = lsttempOJTBE;
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Success";
+                }
+                else
+                {
+                    objResponse.StatusCode = "0";
+                    objResponse.StatusMessage = "Records Not Found";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:GetOJTAcknowledgementResult() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:GetOJTAcknowledgementResult() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+
+        #endregion
+
+        #region Archive OJT
+        public string UserArchiveOJT(string strJsonString)
+        {
+            GeneralResponse objResponse = new GeneralResponse();
+            try
+            {
+                OJTSentToBE objOJT = new OJTSentToBE();
+                objOJT = Utility.Utility.JsonDeserialize<OJTSentToBE>(strJsonString);
+                if (objOJT != null)
+                {
+
+                    string strResult = OJTBLL.UserArchiveOJT(objOJT);
+                    if (strResult == "0")
+                    {
+                        objResponse.StatusCode = "0";
+                        objResponse.StatusMessage = "success";
+                    }
+                    else
+                    {
+                        objResponse.StatusCode = strResult;
+                        objResponse.StatusMessage = "Db error";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:UserArchiveOJT() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:UserArchiveOJT() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+        public string UserArchiveOJTFromWeb(string strUserId)
+        {
+            UserArchiveOJTFromWebResponse objResponse = new UserArchiveOJTFromWebResponse();
+            try
+            {
+                List<OJTArchive> lstOJTBE = new List<OJTArchive>();
+                List<OJTArchive> lstOJTBEtemp = new List<OJTArchive>();
+                lstOJTBE = OJTBLL.GetUserArchiveOJTFromWeb(strUserId);
+                if (lstOJTBE != null)
+                {
+                    foreach (OJTArchive obj in lstOJTBE)
+                    {
+                        string strCreatedByNameEnc = objUtility.Decrypt(obj.UserIdByName, true);
+                        obj.UserIdByName = strCreatedByNameEnc;
+                        lstOJTBEtemp.Add(obj);
+                    }
+                }
+                objResponse.ArchiveResult = lstOJTBEtemp;
+                objResponse.StatusCode = "0";
+                objResponse.StatusMessage = "Success";
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:UserArchiveOJTFromWeb() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:UserArchiveOJTFromWeb() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+
+        #endregion
+
+
+        #region HARM
+
+        public string GetHARMFromWeb()
+        {
+            GetHARMFromWebResponse objResponse = new GetHARMFromWebResponse();
+            try
+            {
+                List<OJTHARM> lstOJTHARMBE = new List<OJTHARM>();
+                lstOJTHARMBE = OJTBLL.GetHARMFromWeb();
+                objResponse.lstHARM = lstOJTHARMBE;
+                objResponse.StatusCode = "0";
+                objResponse.StatusMessage = "Success";
+            }
+            catch (Exception ex)
+            {
+                if (Logger.LogErrors == true)
+                {
+                    if (ex.InnerException != null)
+                        Logger.WriteToErrorLog("CommunicationService:GetHARMFromWeb() ", ex.Message, ex.InnerException.Message);
+                    else
+                        Logger.WriteToErrorLog("CommunicationService:GetHARMFromWeb() ", ex.Message);
+                    objResponse.StatusCode = "-3";
+                    objResponse.StatusMessage = ex.Message.ToString();
+                }
+            }
+            string strResponse = Utility.Utility.JsonSerialize(objResponse.GetType(), objResponse);
+            return strResponse;
+        }
+
+        #endregion
         #endregion
     }
 }

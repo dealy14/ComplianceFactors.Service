@@ -10,8 +10,6 @@ namespace CFService.BusinessComponent
 {
     public class FieldNotesBLL
     {
-
-       
         public static string CreateFieldNotes(FieldNotesBE clsFieldNotes)
         {
             Hashtable htCreateFN = new Hashtable();
@@ -23,6 +21,8 @@ namespace CFService.BusinessComponent
             htCreateFN.Add("@sv_fieldnote_sent_to_user", clsFieldNotes.SentToXML);
             htCreateFN.Add("@sv_fieldnote_id", clsFieldNotes.FielsNoteNO);
             htCreateFN.Add("@sv_fieldnote_attachment", clsFieldNotes.AttachmentXML);
+            htCreateFN.Add("@sv_fieldnote_is_acknowledge", clsFieldNotes.IsAcknowledge);
+            htCreateFN.Add("@sv_fieldnote_creation_date_time",Convert.ToDateTime(clsFieldNotes.CreatedDate));
             
             try
             {
@@ -155,6 +155,7 @@ namespace CFService.BusinessComponent
             htModifyFN.Add("@sv_fieldnote_sent_to_user", clsFieldNotes.SentToXML);
             htModifyFN.Add("@sv_fieldnote_id", clsFieldNotes.FielsNoteNO);
             htModifyFN.Add("@sv_fieldnote_attachment", clsFieldNotes.AttachmentXML);
+            htModifyFN.Add("@sv_fieldnote_is_acknowledge", clsFieldNotes.IsAcknowledge);
             try
             {
                 DataTable dtResult = DataProxy.FetchDataTable("sv_wcf_Modify_fieldnote", htModifyFN);
@@ -220,6 +221,8 @@ namespace CFService.BusinessComponent
                             objFieldNotes.description = dr["sv_fieldnote_description"].ToString();
                             objFieldNotes.location = dr["sv_fieldnote_location"].ToString();
                             objFieldNotes.FielsNoteNO = dr["sv_fieldnote_id"].ToString();
+                            objFieldNotes.IsAcknowledge = Convert.ToBoolean(dr["sv_fieldnote_is_acknowledge"].ToString());
+                            objFieldNotes.CreatedDate = dr["sv_fieldnote_creation_date"].ToString();
                             lstFieldNotes.Add(objFieldNotes);
                         }
                     }
@@ -298,11 +301,14 @@ namespace CFService.BusinessComponent
                             objFieldNotes.description = dr["sv_fieldnote_description"].ToString();
                             objFieldNotes.location = dr["sv_fieldnote_location"].ToString();
                             objFieldNotes.FielsNoteNO = dr["sv_fieldnote_id"].ToString();
+                            objFieldNotes.IsAcknowledge =Convert.ToBoolean(dr["sv_fieldnote_is_acknowledge"].ToString());
+                            objFieldNotes.CreatedDate = dr["sv_fieldnote_creation_date"].ToString();
                             lstFieldNotes.Add(objFieldNotes);
                         }
 
                         if (dsResult.Tables.Count > 1)
                         {
+                            lstAttachments = new List<FieldNotesAttachmentBE>();
                             foreach (DataRow dr in dsResult.Tables[1].Rows)
                             {
                                 objAttachment = new FieldNotesAttachmentBE();
@@ -386,6 +392,7 @@ namespace CFService.BusinessComponent
                             objFieldNote.location = dr["sv_fieldnote_location"].ToString();
                             objFieldNote.FielsNoteNO = dr["sv_fieldnote_id"].ToString();
                             objFieldNote.IsAcknowledge = Convert.ToBoolean(dr["sv_fieldnote_is_need_acknowledged"]);
+                            objFieldNote.CreatedDate = dr["sv_fieldnote_creation_date"].ToString();
                             lstFieldNotes.Add(objFieldNote);
                         }
                     }
@@ -448,6 +455,7 @@ namespace CFService.BusinessComponent
             Hashtable htAcknowledgeFieldNote = new Hashtable();
             htAcknowledgeFieldNote.Add("@sv_fieldnote_sent_to_user", clsFieldNotesSentTo.SentTo);
             htAcknowledgeFieldNote.Add("@sv_fieldnote_id", clsFieldNotesSentTo.FieldNoteID);
+            htAcknowledgeFieldNote.Add("@sv_fieldnote_acknowledge_date", clsFieldNotesSentTo.AcknowledgeDate);
             try
             {
                 DataTable dtResult = DataProxy.FetchDataTable("sv_wcf_user_acknowledge_fieldnote", htAcknowledgeFieldNote);
@@ -478,6 +486,7 @@ namespace CFService.BusinessComponent
                         objReturn.FieldNoteID = dr["sv_fieldnote_id_pk"].ToString();
                         objReturn.SentToUser = dr["sv_fieldnote_sent_to_user_fk"].ToString();
                         objReturn.SentToUserByName = dr["u_username_enc"].ToString();
+                        objReturn.AcknowledgeDate = Convert.ToString(dr["sv_fieldnote_acknowledge_date"]);
                        // objReturn.IsAcknowledge = Convert.ToBoolean(dr["sv_fieldnote_is_need_acknowledged"]);
                         lstReturn.Add(objReturn);
                     }

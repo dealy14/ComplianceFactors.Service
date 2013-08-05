@@ -19,6 +19,12 @@ namespace ComplianceFactorService
         {
             return "Hello Test Return";
         }
+
+        public string HelloTest1()
+        {
+            return "Hello Test Return";
+        }
+
         #region UserAuthentication
         public string UserAuthentication(string UserAuthenticationRequest)
         {

@@ -26,3 +26,34 @@ Parameter name: s
 
 02/28/2013 09:16 PM : CommunicationService:GetUpdatedFNWebToMobile()  : Object reference not set to an instance of an object.
 
+05/07/2013 06:20 PM : CommunicationService:CreateOJT()  : Cannot insert the value NULL into column 'sv_ojt_attachments_id_pk', table 'ComplianceFactors.Compliance.sv_tb_ojt_attachments'; column does not allow nulls. INSERT fails.
+The statement has been terminated.
+
+05/08/2013 06:31 PM : CommunicationService:GetSavedOJTWebToMobile()  : Object reference not set to an instance of an object.
+
+05/08/2013 06:54 PM : CommunicationService:SavedOJTMobileResponse()  : The COMMIT TRANSACTION request has no corresponding BEGIN TRANSACTION.
+
+05/08/2013 07:00 PM : CommunicationService:GetUpdatedOJTWebToMobile()  : Could not find stored procedure 'sv_wcf_get_user_modify_ojt'.
+
+05/08/2013 08:55 PM : CommunicationService:DownloadReceivedOJT()  : Could not find stored procedure 'sv_wcf_get_received_ojt'.
+
+05/08/2013 08:57 PM : CommunicationService:DownloadReceivedOJT()  : Column 'sv_ojt_is_need_acknowledged' does not belong to table Table.
+
+05/08/2013 09:11 PM : CommunicationService:UserAcknowledgeOJT()  : Could not find stored procedure 'sv_wcf_user_acknowledge_ojt'.
+
+05/08/2013 09:37 PM : CommunicationService:DeleteAttachOJT()  : Could not find stored procedure 'sv_wcf_delete_ojt_Attachment'.
+
+05/08/2013 09:40 PM : CommunicationService:GetDeleteAttachOJTFromWeb()  : Could not find stored procedure 'sv_wcf_get_user_delete_ojt_attach'.
+
+05/14/2013 03:59 PM : FileTransferService:OJTUpload()  : Could not find stored procedure 'sv_wcf_ojt_attachments_upload'.
+
+05/14/2013 04:13 PM : FileTransferService:OJTUpload()  : Procedure or function 'sv_wcf_ojt_attachments_upload' expects parameter '@sv_ojt_attachments_id_pk', which was not supplied.
+
+07/09/2013 03:43 PM : CommunicationService:CreateOJT()  : Procedure or function 'sv_wcf_insert_ojt' expects parameter '@sv_ojt_harm_id_fk', which was not supplied.
+
+07/09/2013 03:44 PM : CommunicationService:CreateOJT()  : Error converting data type nvarchar to uniqueidentifier.
+
+07/09/2013 06:03 PM : CommunicationService:CreateOJT()  : Error converting data type nvarchar to uniqueidentifier.
+
+07/09/2013 07:02 PM : CommunicationService:CreateOJT()  : Procedure or function 'sv_wcf_insert_ojt' expects parameter '@sv_ojt_harm_id_fk', which was not supplied.
+

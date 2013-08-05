@@ -18,6 +18,8 @@ namespace ComplianceFactorService
         [OperationContract]
         UploadResponseTest FieldNoteAttachmentsUpload(clsFieldNotesAttachment clsfields);
 
+
+        //Use for live
         [OperationContract]
         byte[] FieldNoteAttachmentsDownload(string strAttachementFileID);
 
@@ -26,6 +28,19 @@ namespace ComplianceFactorService
 
         //[OperationContract]
         //string Download(string strJsonString);
+
+        //OJT
+        [OperationContract]
+        byte[] OJTAttachmentsDownload(string strAttachementFileID);
+
+        [OperationContract]
+        string OJTUpload(string strJsonString);
+
+        [OperationContract]
+        string OJTCertificateUpload(string strJsonString);
+
+        [OperationContract]
+        byte[] OJTCertificateDownload(string strOJTID);
 
     }
 
@@ -57,5 +72,21 @@ namespace ComplianceFactorService
         public string FileBase64string { get; set; }
         public string FileExtension { get; set; }
        // public byte[] Filebyte { get; set; }
+    }
+
+    public class clsOJTFileDetails
+    {
+        public string OJTAttID { get; set; }
+        public string FileBase64string { get; set; }
+        public string FileExtension { get; set; }
+        // public byte[] Filebyte { get; set; }
+    }
+
+    public class clsOJTCertificateFileDetails
+    {
+        public string OJTID { get; set; }
+        public string FileBase64string { get; set; }
+        public string FileExtension { get; set; }
+        // public byte[] Filebyte { get; set; }
     }
 }

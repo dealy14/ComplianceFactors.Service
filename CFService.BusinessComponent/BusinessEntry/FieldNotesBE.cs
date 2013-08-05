@@ -27,7 +27,8 @@ namespace CFService.BusinessComponent.BusinessEntry
         public string SentToXML { get; set; }
         public string AttachmentXML { get; set; }
         public bool Status { get; set; }
-       // public bool IsAcknowledge { get; set; }
+        public bool IsAcknowledge { get; set; }
+        public string CreatedDate { get; set; }
     }
 
     public class FieldNotesSentToBE
@@ -39,6 +40,7 @@ namespace CFService.BusinessComponent.BusinessEntry
         public bool IsAcknowledge { get; set; }
         public bool AcknowledgeStaus { get; set; }
         public bool IsMobileSync { get; set; }
+        public string AcknowledgeDate { get; set; }
     }
 
     public class FieldNotesAttachmentBE
@@ -78,6 +80,7 @@ namespace CFService.BusinessComponent.BusinessEntry
         public string location { get; set; }
         public string FielsNoteNO { get; set; }
         public bool IsAcknowledge { get; set; }
+        public string CreatedDate { get; set; }
     }
 
 
@@ -86,6 +89,7 @@ namespace CFService.BusinessComponent.BusinessEntry
         public string FieldNoteID { get; set; }
         public string SentToUser { get; set; }
         public string SentToUserByName { get; set; }
+        public string AcknowledgeDate { get; set; }
     }
 
 

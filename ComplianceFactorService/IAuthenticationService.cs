@@ -24,6 +24,8 @@ namespace ComplianceFactorService
         //Get all CO
         [OperationContract]
         string GetAllComplianceOfficer();
+
+        
     }
 
     [DataContract]

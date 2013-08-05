@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CFService.BusinessComponent.BusinessEntry
 {
-    class MInspectionsBE
+    public  class MInspectionsBE
     {
     }
 }
